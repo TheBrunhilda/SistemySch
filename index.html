@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Системы счисления · 10 класс</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: #0f1419;
+    color: #e5e7eb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 16px 12px 40px;
+  }
+  .app {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 9 / 16;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Заголовок */
+  .header {
+    background: linear-gradient(135deg, #1c2330 0%, #1a2029 100%);
+    border: 1px solid #2a3240;
+    border-radius: 18px;
+    padding: 18px 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(110,231,183,0.12), transparent 70%);
+    border-radius: 50%;
+  }
+  .header .tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6ee7b7;
+    background: rgba(110,231,183,0.08);
+    border: 1px solid rgba(110,231,183,0.2);
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .header p {
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  /* Прогресс */
+  .progress-wrap {
+    background: #1a2029;
+    border: 1px solid #2a3240;
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  .progress-top .score {
+    color: #fbbf24;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-bar {
+    height: 6px;
+    background: #0f1419;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #6ee7b7, #a78bfa);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Карточка задания */
+  .task {
+    background: #1a2029;
+    border: 1px solid #2a3240;
+    border-radius: 18px;
+    padding: 16px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .task.correct { border-color: rgba(52,211,153,0.5); }
+  .task.wrong { border-color: rgba(248,113,113,0.4); }
+
+  .task-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .level-badge {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #0f1419;
+  }
+  .level-1 { background: #6ee7b7; }
+  .level-2 { background: #a78bfa; }
+  .level-3 { background: #fbbf24; }
+
+  .task-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e5e7eb;
+  }
+  .task-points {
+    margin-left: auto;
+    font-size: 11px;
+    color: #9ca3af;
+    background: #0f1419;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #2a3240;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .task-text {
+    font-size: 14px;
+    color: #d1d5db;
+    margin-bottom: 12px;
+    line-height: 1.55;
+  }
+  .task-text .math {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #0f1419;
+    padding: 2px 7px;
+    border-radius: 6px;
+    color: #fbbf24;
+    font-size: 13px;
+    border: 1px solid #2a3240;
+  }
+
+  .inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .input-row label {
+    font-size: 12px;
+    color: #9ca3af;
+    min-width: 32px;
+  }
+  .input-row input {
+    flex: 1;
+    background: #0f1419;
+    border: 1px solid #2a3240;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #e5e7eb;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .input-row input:focus {
+    border-color: #6ee7b7;
+    background: #121820;
+  }
+  .input-row input.ok { border-color: #34d399; color: #6ee7b7; }
+  .input-row input.bad { border-color: #f87171; color: #fca5a5; }
+
+  .btn {
+    width: 100%;
+    background: linear-gradient(135deg, #6ee7b7, #5eead4);
+    color: #0f1419;
+    border: none;
+    border-radius: 12px;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.2s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn.secondary {
+    background: #2a3240;
+    color: #e5e7eb;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .feedback {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; animation: fade 0.3s; }
+  .feedback.ok {
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.25);
+    color: #6ee7b7;
+  }
+  .feedback.bad {
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.25);
+    color: #fca5a5;
+  }
+  .feedback .hint {
+    display: block;
+    margin-top: 6px;
+    color: #9ca3af;
+    font-size: 12px;
+  }
+
+  /* Итог */
+  .result {
+    background: linear-gradient(135deg, #1c2330, #1a2029);
+    border: 1px solid #2a3240;
+    border-radius: 18px;
+    padding: 18px;
+    text-align: center;
+    display: none;
+  }
+  .result.show { display: block; animation: fade 0.4s; }
+  .result .big-score {
+    font-size: 44px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6ee7b7, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .result .big-score small {
+    font-size: 18px;
+    color: #9ca3af;
+    -webkit-text-fill-color: #9ca3af;
+    font-weight: 500;
+  }
+  .result .level-name {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #fbbf24;
+    font-weight: 600;
+  }
+  .result .desc {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  .result .scale {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    font-size: 10px;
+  }
+  .scale div {
+    background: #0f1419;
+    border: 1px solid #2a3240;
+    border-radius: 8px;
+    padding: 6px 4px;
+    color: #9ca3af;
+  }
+  .scale div.active {
+    border-color: #fbbf24;
+    color: #fbbf24;
+    background: rgba(251,191,36,0.06);
+  }
+
+  .reset-wrap { margin-top: 4px; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <span class="tag">Информатика · 10 класс</span>
+    <h1>Системы счисления</h1>
+    <p>Три уровня · максимум 100 баллов</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span>Прогресс</span>
+      <span class="score"><span id="scoreNum">0</span> / 100</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- УРОВЕНЬ 1 -->
+  <div class="task" id="task1">
+    <div class="task-head">
+      <div class="level-badge level-1">1</div>
+      <div class="task-title">Базовый уровень</div>
+      <div class="task-points">50 б.</div>
+    </div>
+    <div class="task-text">
+      Запиши число <span class="math">145₁₀</span> в двоичной, восьмеричной и шестнадцатеричной системах счисления.
+    </div>
+    <div class="inputs">
+      <div class="input-row">
+        <label>₂</label>
+        <input type="text" id="q1_bin" placeholder="например, 1010" autocomplete="off" inputmode="numeric">
+      </div>
+      <div class="input-row">
+        <label>₈</label>
+        <input type="text" id="q1_oct" placeholder="например, 123" autocomplete="off" inputmode="numeric">
+      </div>
+      <div class="input-row">
+        <label>₁₆</label>
+        <input type="text" id="q1_hex" placeholder="например, 9A" autocomplete="off">
+      </div>
+    </div>
+    <button class="btn" onclick="check1()">Проверить</button>
+    <div class="feedback" id="fb1"></div>
+  </div>
+
+  <!-- УРОВЕНЬ 2 -->
+  <div class="task" id="task2">
+    <div class="task-head">
+      <div class="level-badge level-2">2</div>
+      <div class="task-title">Повышенный уровень</div>
+      <div class="task-points">25 б.</div>
+    </div>
+    <div class="task-text">
+      Выполни сложение в двоичной системе:<br>
+      <span class="math">11011₂ + 1011₂</span><br>
+      Запиши результат в двоичной системе.
+    </div>
+    <div class="inputs">
+      <div class="input-row">
+        <label>₂</label>
+        <input type="text" id="q2_ans" placeholder="например, 100110" autocomplete="off" inputmode="numeric">
+      </div>
+    </div>
+    <button class="btn" onclick="check2()">Проверить</button>
+    <div class="feedback" id="fb2"></div>
+  </div>
+
+  <!-- УРОВЕНЬ 3 -->
+  <div class="task" id="task3">
+    <div class="task-head">
+      <div class="level-badge level-3">3</div>
+      <div class="task-title">Практико-ориентированный</div>
+      <div class="task-points">25 б.</div>
+    </div>
+    <div class="task-text">
+      Найди основание системы счисления <span class="math">x</span>, если:<br>
+      <span class="math">23ₓ + 41ₓ = 70ₓ</span>
+    </div>
+    <div class="inputs">
+      <div class="input-row">
+        <label>x =</label>
+        <input type="text" id="q3_ans" placeholder="число" autocomplete="off" inputmode="numeric">
+      </div>
+    </div>
+    <button class="btn" onclick="check3()">Проверить</button>
+    <div class="feedback" id="fb3"></div>
+  </div>
+
+  <!-- ИТОГ -->
+  <div class="result" id="result">
+    <div class="big-score"><span id="finalScore">0</span><small> / 100</small></div>
+    <div class="level-name" id="levelName">—</div>
+    <div class="desc" id="levelDesc">—</div>
+    <div class="scale">
+      <div id="s1">0–49<br>Базовый</div>
+      <div id="s2">50–74<br>Повышен.</div>
+      <div id="s3">75–89<br>Практич.</div>
+      <div id="s4">90–100<br>Мастер</div>
+    </div>
+  </div>
+
+  <div class="reset-wrap">
+    <button class="btn secondary" onclick="resetAll()">↻ Начать заново</button>
+  </div>
+
+</div>
+
+<script>
+  const state = { t1: false, t2: false, t3: false };
+  const points = { t1: 50, t2: 25, t3: 25 };
+
+  function norm(s) { return (s || '').trim().toUpperCase().replace(/\s+/g, ''); }
+
+  function updateScore() {
+    let total = 0;
+    if (state.t1) total += points.t1;
+    if (state.t2) total += points.t2;
+    if (state.t3) total += points.t3;
+    document.getElementById('scoreNum').textContent = total;
+    document.getElementById('progressFill').style.width = total + '%';
+    document.getElementById('finalScore').textContent = total;
+
+    // Уровень
+    let name = 'Начни решать задания', desc = 'Решай по порядку — от простого к сложному';
+    let active = 0;
+    if (total >= 90)      { name = '🏆 Мастер'; desc = 'Отличное владение темой!'; active = 4; }
+    else if (total >= 75) { name = '✨ Практический уровень'; desc = 'Уверенное применение систем счисления'; active = 3; }
+    else if (total >= 50) { name = '📘 Повышенный уровень'; desc = 'Хорошее понимание арифметики систем'; active = 2; }
+    else if (total > 0)   { name = '📗 Базовый уровень'; desc = 'Основы усвоены, продолжай'; active = 1; }
+    document.getElementById('levelName').textContent = name;
+    document.getElementById('levelDesc').textContent = desc;
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('s' + i).classList.toggle('active', i === active);
+    }
+
+    const allDone = state.t1 && state.t2 && state.t3;
+    document.getElementById('result').classList.toggle('show', allDone);
+  }
+
+  function showFeedback(id, ok, text, hint) {
+    const fb = document.getElementById(id);
+    fb.className = 'feedback show ' + (ok ? 'ok' : 'bad');
+    fb.innerHTML = text + (hint ? '<span class="hint">' + hint + '</span>' : '');
+  }
+
+  function check1() {
+    const bin = norm(document.getElementById('q1_bin').value);
+    const oct = norm(document.getElementById('q1_oct').value);
+    const hex = norm(document.getElementById('q1_hex').value);
+
+    const okBin = bin === '10010001';
+    const okOct = oct === '221';
+    const okHex = hex === '91';
+
+    document.getElementById('q1_bin').classList.toggle('ok', okBin);
+    document.getElementById('q1_bin').classList.toggle('bad', !okBin && bin !== '');
+    document.getElementById('q1_oct').classList.toggle('ok', okOct);
+    document.getElementById('q1_oct').classList.toggle('bad', !okOct && oct !== '');
+    document.getElementById('q1_hex').classList.toggle('ok', okHex);
+    document.getElementById('q1_hex').classList.toggle('bad', !okHex && hex !== '');
+
+    const allOk = okBin && okOct && okHex;
+    state.t1 = allOk;
+    document.getElementById('task1').classList.toggle('correct', allOk);
+    document.getElementById('task1').classList.toggle('wrong', !allOk && (bin || oct || hex));
+
+    if (allOk) {
+      showFeedback('fb1', true, '✓ Верно! +50 баллов', '145₁₀ = 10010001₂ = 221₈ = 91₁₆');
+    } else {
+      let wrong = [];
+      if (!okBin) wrong.push('двоичная');
+      if (!okOct) wrong.push('восьмеричная');
+      if (!okHex) wrong.push('шестнадцатеричная');
+      showFeedback('fb1', false,
+        '✗ Ошибка в: ' + wrong.join(', '),
+        'Подсказка: дели число на основание системы и записывай остатки снизу вверх.');
+    }
+    updateScore();
+  }
+
+  function check2() {
+    const ans = norm(document.getElementById('q2_ans').value);
+    const ok = ans === '100110';
+    document.getElementById('q2_ans').classList.toggle('ok', ok);
+    document.getElementById('q2_ans').classList.toggle('bad', !ok && ans !== '');
+    state.t2 = ok;
+    document.getElementById('task2').classList.toggle('correct', ok);
+    document.getElementById('task2').classList.toggle('wrong', !ok && ans !== '');
+    if (ok) {
+      showFeedback('fb2', true, '✓ Верно! +25 баллов', '11011₂ + 1011₂ = 100110₂ (27 + 11 = 38₁₀)');
+    } else {
+      showFeedback('fb2', false,
+        '✗ Неверный ответ',
+        'Подсказка: складывай поразрядно справа налево, не забывая переносить 1 при 1+1.');
+    }
+    updateScore();
+  }
+
+  function check3() {
+    const raw = norm(document.getElementById('q3_ans').value);
+    const n = parseInt(raw, 10);
+    const ok = n === 4;
+    document.getElementById('q3_ans').classList.toggle('ok', ok);
+    document.getElementById('q3_ans').classList.toggle('bad', !ok && raw !== '');
+    state.t3 = ok;
+    document.getElementById('task3').classList.toggle('correct', ok);
+    document.getElementById('task3').classList.toggle('wrong', !ok && raw !== '');
+    if (ok) {
+      showFeedback('fb3', true, '✓ Верно! +25 баллов',
+        'Развёрнутая форма: (2x+3)+(4x+1)=7x → 6x+4=7x → x=4');
+    } else {
+      showFeedback('fb3', false,
+        '✗ Неверный ответ',
+        'Подсказка: распиши каждое число по разрядам: 23ₓ = 2·x+3, 41ₓ = 4·x+1, 70ₓ = 7·x. Реши уравнение.');
+    }
+    updateScore();
+  }
+
+  function resetAll() {
+    state.t1 = state.t2 = state.t3 = false;
+    ['q1_bin','q1_oct','q1_hex','q2_ans','q3_ans'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.classList.remove('ok','bad');
+    });
+    ['task1','task2','task3'].forEach(id => {
+      document.getElementById(id).classList.remove('correct','wrong');
+    });
+    ['fb1','fb2','fb3'].forEach(id => {
+      document.getElementById(id).className = 'feedback';
+    });
+    document.getElementById('result').classList.remove('show');
+    updateScore();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
